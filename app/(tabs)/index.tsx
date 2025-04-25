@@ -107,7 +107,10 @@ export default function Index() {
       await FileSystem.writeAsStringAsync(filePath, dataUrl.split(',')[1], {
         encoding: FileSystem.EncodingType.Base64,
       });
-      await MediaLibrary.saveToLibraryAsync(filePath);
+      await MediaLibrary.saveToLibraryAsync(filePath).catch((e) => {
+        console.log('MediaLibrary error:', e);
+        alert(`Saved to cache: ${filePath}`);
+      });
       ToastAndroid.show('QR Code saved to gallery', ToastAndroid.LONG);
     } catch (e) {
       console.log(e);
@@ -227,8 +230,11 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   qrContainer: {
     position: 'absolute',
-    bottom: 10,
+    top: 10, // Перемещён в верхний правый угол
     right: 10,
+    backgroundColor: '#fff', // Белый фон для контраста
+    padding: 5, // Отступы для аккуратного вида
+    borderRadius: 5, // Скругленные углы
   } as ViewStyle,
   qrInput: {
     width: 200,

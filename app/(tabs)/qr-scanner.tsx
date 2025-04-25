@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Platform, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, Text, View, Platform, ViewStyle, TextStyle, Linking, Pressable } from 'react-native';
 import { Stack } from 'expo-router';
-import { CameraView, Camera } from 'expo-camera'; // Изменён импорт: добавлен CameraView
+import { CameraView, Camera } from 'expo-camera';
 
 export default function QRScannerScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -15,8 +15,26 @@ export default function QRScannerScreen() {
     requestPermission();
   }, []);
 
-  const handleBarCodeScanned = ({ data }: { data: string }) => {
+  const handleBarCodeScanned = async ({ data }: { data: string }) => {
     setScannedData(data);
+    // Проверяем, является ли data валидным URL
+    if (data && (data.startsWith('http://') || data.startsWith('https://'))) {
+      try {
+        await Linking.openURL(data); // Автоматически открываем ссылку
+      } catch (error) {
+        console.log('Failed to open URL:', error);
+      }
+    }
+  };
+
+  const openLink = async () => {
+    if (scannedData) {
+      try {
+        await Linking.openURL(scannedData); // Открываем ссылку при нажатии на кнопку
+      } catch (error) {
+        console.log('Failed to open URL:', error);
+      }
+    }
   };
 
   if (Platform.OS === 'web') {
@@ -52,14 +70,17 @@ export default function QRScannerScreen() {
       <Stack.Screen options={{ title: 'QR Code Scanner' }} />
       <CameraView
         style={StyleSheet.absoluteFill}
-        onBarcodeScanned={scannedData ? undefined : handleBarCodeScanned} // Изменено: onBarCodeScanned → onBarcodeScanned
+        onBarcodeScanned={scannedData ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
-          barcodeTypes: ['qr'], // Изменено: barCodeTypes → barcodeTypes
+          barcodeTypes: ['qr'],
         }}
       />
       {scannedData && (
         <View style={styles.resultContainer}>
           <Text style={styles.resultText}>Scanned: {scannedData}</Text>
+          <Pressable style={styles.button} onPress={openLink}>
+            <Text style={styles.buttonText}>Open Link</Text>
+          </Pressable>
         </View>
       )}
     </View>
@@ -85,9 +106,22 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.7)',
     padding: 10,
     borderRadius: 5,
+    alignItems: 'center',
   } as ViewStyle,
   resultText: {
     color: '#fff',
     fontSize: 16,
+    marginBottom: 10,
+  } as TextStyle,
+  button: {
+    backgroundColor: '#ffd33d',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 5,
+  } as ViewStyle,
+  buttonText: {
+    color: '#000',
+    fontSize: 14,
+    fontWeight: 'bold',
   } as TextStyle,
 });

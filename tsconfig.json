@@ -2,6 +2,12 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "module": "esnext", // Добавлено для поддержки динамических импортов
+    "target": "esnext", // Для совместимости с современными JS-функциями
+    "moduleResolution": "node", // Рекомендуется для React Native/Expo
+    "allowSyntheticDefaultImports": true, // Для совместимости с импортами
+    "esModuleInterop": true, // Для совместимости с CommonJS-модулями
+    "skipLibCheck": true, // Ускоряет компиляцию
     "paths": {
       "@/*": [
         "./*"

@@ -1,7 +1,5 @@
 import { Tabs } from 'expo-router';
-
 import Ionicons from '@expo/vector-icons/Ionicons';
-
 
 export default function TabLayout() {
   return (
@@ -24,7 +22,24 @@ export default function TabLayout() {
         options={{
           title: 'About',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+            <Ionicons
+              name={focused ? 'information-circle' : 'information-circle-outline'}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="qr-scanner"
+        options={{
+          title: 'QR Scanner',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'qr-code-sharp' : 'qr-code-outline'}
+              color={color}
+              size={24}
+            />
           ),
         }}
       />

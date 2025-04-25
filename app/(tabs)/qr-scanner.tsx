@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Platform, ViewStyle, TextStyle, Linking, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Platform, ViewStyle, TextStyle, Linking, Pressable, Alert } from 'react-native';
 import { Stack } from 'expo-router';
 import { CameraView, Camera } from 'expo-camera';
 
 export default function QRScannerScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scannedData, setScannedData] = useState<string | null>(null);
+  const [isScanned, setIsScanned] = useState<boolean>(false); // Флаг для предотвращения повторного сканирования
 
   useEffect(() => {
     const requestPermission = async () => {
@@ -16,13 +17,21 @@ export default function QRScannerScreen() {
   }, []);
 
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
+    if (isScanned) return; // Предотвращаем повторное сканирование
     setScannedData(data);
-    // Проверяем, является ли data валидным URL
+    setIsScanned(true);
+
     if (data && (data.startsWith('http://') || data.startsWith('https://'))) {
       try {
-        await Linking.openURL(data); // Автоматически открываем ссылку
+        const canOpen = await Linking.canOpenURL(data);
+        if (canOpen) {
+          await Linking.openURL(data);
+        } else {
+          Alert.alert('Error', 'Cannot open URL on this device.');
+        }
       } catch (error) {
         console.log('Failed to open URL:', error);
+        Alert.alert('Error', `Failed to open URL: ${data}`);
       }
     }
   };
@@ -30,11 +39,22 @@ export default function QRScannerScreen() {
   const openLink = async () => {
     if (scannedData) {
       try {
-        await Linking.openURL(scannedData); // Открываем ссылку при нажатии на кнопку
+        const canOpen = await Linking.canOpenURL(scannedData);
+        if (canOpen) {
+          await Linking.openURL(scannedData);
+        } else {
+          Alert.alert('Error', 'Cannot open URL on this device.');
+        }
       } catch (error) {
         console.log('Failed to open URL:', error);
+        Alert.alert('Error', `Failed to open URL: ${scannedData}`);
       }
     }
+  };
+
+  const resetScanner = () => {
+    setScannedData(null);
+    setIsScanned(false);
   };
 
   if (Platform.OS === 'web') {
@@ -70,7 +90,7 @@ export default function QRScannerScreen() {
       <Stack.Screen options={{ title: 'QR Code Scanner' }} />
       <CameraView
         style={StyleSheet.absoluteFill}
-        onBarcodeScanned={scannedData ? undefined : handleBarCodeScanned}
+        onBarcodeScanned={isScanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
           barcodeTypes: ['qr'],
         }}
@@ -80,6 +100,9 @@ export default function QRScannerScreen() {
           <Text style={styles.resultText}>Scanned: {scannedData}</Text>
           <Pressable style={styles.button} onPress={openLink}>
             <Text style={styles.buttonText}>Open Link</Text>
+          </Pressable>
+          <Pressable style={styles.button} onPress={resetScanner}>
+            <Text style={styles.buttonText}>Scan Again</Text>
           </Pressable>
         </View>
       )}
@@ -118,6 +141,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 5,
+    marginVertical: 5,
   } as ViewStyle,
   buttonText: {
     color: '#000',

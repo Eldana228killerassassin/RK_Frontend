@@ -31,12 +31,51 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="create-qr"
+        options={{
+          title: 'Create QR',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'qr-code-sharp' : 'qr-code-outline'}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="qr-scanner"
         options={{
           title: 'QR Scanner',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'qr-code-sharp' : 'qr-code-outline'}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Explore',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'globe' : 'globe-outline'}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="stickersmash"
+        options={{
+          title: 'StickerSmash',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? 'images' : 'images-outline'}
               color={color}
               size={24}
             />
